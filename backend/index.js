@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/tasks", taskroutes);
+
 app.get("/api/health", (req, res) => {
   res.status(200).send("Server is up and Running!");
 });

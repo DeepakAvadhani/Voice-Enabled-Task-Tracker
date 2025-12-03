@@ -22,11 +22,18 @@ router.post(
   transcriptionController.transcribeAudio
 );
 router.post(
-  "/trascribe-parse",
+  "/transcribe-parse",
   upload.single("audio"),
   transcriptionController.transcribeAndParse
 );
 
 router.post("/parse", parseController.parseVoice);
+
+//additional routes
+router.post("/search/query", taskController.searchTasks);
+router.get("/get/upcoming", taskController.getUpcomingTasks);
+router.get("/get/overdue", taskController.getOverdueTasks);
+router.get("/get/stats", taskController.getTaskStatistics);
+router.get("/get/priority/:priority", taskController.filterByPriority);
 
 module.exports = router;

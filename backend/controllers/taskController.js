@@ -175,7 +175,7 @@ const taskController = {
     try {
       const { priority } = req.params;
       
-      const validPriorities = ['Low', 'Medium', 'High', 'Critical'];
+      const validPriorities = ['low', 'medium', 'high', 'critical'];
       if (!validPriorities.includes(priority)) {
         return res.status(400).json({
           success: false,
