@@ -13,11 +13,11 @@ const parseContoller = {
         message: "Voice input parsed successfully",
         data: {
           original: transcript,
-          parsed: pared,
+          parsed: data,
         },
       });
     } catch (e) {
-      res.status(500).json({ error: "Internal Server Error", e });
+      res.status(500).json({ error: "Internal Server Error" });
     }
   },
 };
