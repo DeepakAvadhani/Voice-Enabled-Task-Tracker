@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { Pool } = require("pg");
 
 const pool = new Pool({
@@ -8,6 +9,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   max: 10,
   idleTimeoutMillis: 30000,
+  ssl: false,
 });
 
 pool

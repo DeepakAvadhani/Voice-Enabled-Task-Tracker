@@ -31,12 +31,18 @@ const migrations = [
     version: 2,
     name: "create_indexes",
     up: async () => {
-      await pool.query(`
-        CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-        CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
-        CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
-        CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
-      `);
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)`
+      );
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority)`
+      );
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date)`
+      );
+      await pool.query(
+        `CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at)`
+      );
     },
     down: async () => {
       await pool.query(`
