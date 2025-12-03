@@ -1,33 +1,52 @@
 const validateTask = (req, res, next) => {
   const { title, description, status, priority, due_date } = req.body;
 
+  if (status) req.body.status = status.toLowerCase();
+  if (priority) req.body.priority = priority.toLowerCase();
+
   if (!title || title.trim().length === 0) {
     return res.status(400).json({
       success: false,
-      message: 'Title is required'
+      message: "Title is required",
     });
   }
 
   if (title.length > 255) {
     return res.status(400).json({
       success: false,
-      message: 'Title must be less than 255 characters'
+      message: "Title must be less than 255 characters",
     });
   }
 
-  const validStatuses = ['To Do', 'In Progress', 'Done'];
+  const validStatuses = [
+    "to do",
+    "in progress",
+    "done",
+    "To Do",
+    "In Progress",
+    "Done",
+  ];
   if (status && !validStatuses.includes(status)) {
     return res.status(400).json({
       success: false,
-      message: 'Status must be one of: To Do, In Progress, Done'
+      message: "Status must be one of: To Do, In Progress, Done",
     });
   }
 
-  const validPriorities = ['Low', 'Medium', 'High', 'Critical'];
+  const validPriorities = [
+    "low",
+    "medium",
+    "high",
+    "critical",
+    "Low",
+    "Medium",
+    "High",
+    "Critical",
+  ];
   if (priority && !validPriorities.includes(priority)) {
     return res.status(400).json({
       success: false,
-      message: 'Priority must be one of: Low, Medium, High, Critical'
+      message: "Priority must be one of: Low, Medium, High, Critical",
     });
   }
 
@@ -36,7 +55,7 @@ const validateTask = (req, res, next) => {
     if (isNaN(date.getTime())) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format for due_date'
+        message: "Invalid date format for due_date",
       });
     }
   }
@@ -50,7 +69,7 @@ const validateTaskUpdate = (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
     return res.status(400).json({
       success: false,
-      message: 'At least one field is required for update'
+      message: "At least one field is required for update",
     });
   }
 
@@ -58,31 +77,47 @@ const validateTaskUpdate = (req, res, next) => {
     if (!title || title.trim().length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Title cannot be empty'
+        message: "Title cannot be empty",
       });
     }
 
     if (title.length > 255) {
       return res.status(400).json({
         success: false,
-        message: 'Title must be less than 255 characters'
+        message: "Title must be less than 255 characters",
       });
     }
   }
 
-  const validStatuses = ['To Do', 'In Progress', 'Done'];
+  const validStatuses = [
+    "to do",
+    "in progress",
+    "done",
+    "To Do",
+    "In Progress",
+    "Done",
+  ];
   if (status && !validStatuses.includes(status)) {
     return res.status(400).json({
       success: false,
-      message: 'Status must be one of: To Do, In Progress, Done'
+      message: "Status must be one of: To Do, In Progress, Done",
     });
   }
 
-  const validPriorities = ['Low', 'Medium', 'High', 'Critical'];
+  const validPriorities = [
+    "low",
+    "medium",
+    "high",
+    "critical",
+    "Low",
+    "Medium",
+    "High",
+    "Critical",
+  ];
   if (priority && !validPriorities.includes(priority)) {
     return res.status(400).json({
       success: false,
-      message: 'Priority must be one of: Low, Medium, High, Critical'
+      message: "Priority must be one of: Low, Medium, High, Critical",
     });
   }
 
@@ -91,7 +126,7 @@ const validateTaskUpdate = (req, res, next) => {
     if (isNaN(date.getTime())) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid date format for due_date'
+        message: "Invalid date format for due_date",
       });
     }
   }
@@ -105,7 +140,7 @@ const validateTaskId = (req, res, next) => {
   if (!id || isNaN(id) || parseInt(id) <= 0) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid task ID'
+      message: "Invalid task ID",
     });
   }
 
@@ -115,5 +150,5 @@ const validateTaskId = (req, res, next) => {
 module.exports = {
   validateTask,
   validateTaskUpdate,
-  validateTaskId
+  validateTaskId,
 };

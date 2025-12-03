@@ -4,16 +4,16 @@ const createTables = `CREATE TABLE IF NOT EXISTS tasks (
 id SERIAL PRIMARY KEY,
 title VARCHAR(255) NOT NULL,
 description TEXT,
-status VARCHAR(50) NOT NULL DEFAULT 'To Do',
-priority VARCHAR(50) NOT NULL DEFAULT 'Medium',
+status VARCHAR(50) NOT NULL DEFAULT 'to do',
+priority VARCHAR(50) NOT NULL DEFAULT 'medium',
 due_date TIMESTAMP,
 voice_transcript TEXT,
 is_voice_ BOOLEAN DEFAULT FALSE,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-CONSTRAINT valid_status CHECK (status IN ('To Do', 'In Progress', 'Completed')),
-CONSTRAINT valid_priority CHECK (priority IN ('Low', 'Medium', 'High','Urgent'))
+CONSTRAINT valid_status CHECK (status IN ('to do', 'in progress', 'done')),
+CONSTRAINT valid_priority CHECK (priority IN ('low', 'medium', 'high','urgent'))
 );`;
 
 const tableIndex = `CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);

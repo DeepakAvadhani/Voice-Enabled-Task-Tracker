@@ -4,12 +4,13 @@ const taskController = {
   createTask: async (req, res, next) => {
     try {
       const { title, description, status, priority, dueDate, voiceTranscript, isVoiceCreated } = req.body;
-      
+      const newstatus = status ? status.toLowerCase() : undefined;
+      const newpriority = priority ? priority.toLowerCase() : undefined;
       const task = await taskModel.create({
         title,
         description,
-        status: status || 'To Do',
-        priority: priority || 'Medium',
+        status: newstatus,
+        priority: newpriority,
         due_date: dueDate,
         voice_transcript: voiceTranscript,
         is_voice_created: isVoiceCreated || false
@@ -33,7 +34,7 @@ const taskController = {
       if (status) filters.status = status;
       if (priority) filters.priority = priority;
       
-      const tasks = await Task.findAll(sortBy, order, filters);
+      const tasks = await taskModel.findAll(sortBy, order, filters);
 
       res.status(200).json({
         success: true,
@@ -49,7 +50,7 @@ const taskController = {
     try {
       const { id } = req.params;
       
-      const task = await Task.findById(id);
+      const task = await taskModel.findById(id);
 
       if (!task) {
         return res.status(404).json({
@@ -72,11 +73,14 @@ const taskController = {
       const { id } = req.params;
       const { title, description, status, priority, dueDate } = req.body;
 
+      const newstatus = status ? status.toLowerCase() : undefined;
+      const newpriority = priority ? priority.toLowerCase() : undefined;
+
       const updates = {};
       if (title !== undefined) updates.title = title;
       if (description !== undefined) updates.description = description;
-      if (status !== undefined) updates.status = status;
-      if (priority !== undefined) updates.priority = priority;
+      if (status !== undefined) updates.status = newstatus;
+      if (priority !== undefined) updates.priority = newpriority;
       if (dueDate !== undefined) updates.due_date = dueDate;
 
       const task = await taskModel.update(id, updates);

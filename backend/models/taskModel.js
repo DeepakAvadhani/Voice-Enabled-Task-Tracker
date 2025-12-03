@@ -17,8 +17,8 @@ const taskModel = {
     const values = [
       title,
       description || null,
-      status || "To Do",
-      priority || "Medium",
+      status || "to do",
+      priority || "medium",
       due_date || null,
       voice_transcript || null,
       is_voice_created || false,
@@ -135,10 +135,10 @@ const taskModel = {
       WHERE status = $1
       ORDER BY 
         CASE priority
-          WHEN 'Critical' THEN 1
-          WHEN 'High' THEN 2
-          WHEN 'Medium' THEN 3
-          WHEN 'Low' THEN 4
+          WHEN 'critical' THEN 1
+          WHEN 'high' THEN 2
+          WHEN 'medium' THEN 3
+          WHEN 'low' THEN 4
         END,
         due_date ASC NULLS LAST
     `;

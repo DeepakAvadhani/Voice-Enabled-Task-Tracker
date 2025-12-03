@@ -10,16 +10,16 @@ const migrations = [
           id SERIAL PRIMARY KEY,
           title VARCHAR(255) NOT NULL,
           description TEXT,
-          status VARCHAR(50) NOT NULL DEFAULT 'To Do',
-          priority VARCHAR(50) DEFAULT 'Medium',
+          status VARCHAR(50) NOT NULL DEFAULT 'to do',
+          priority VARCHAR(50) DEFAULT 'medium',
           due_date TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           voice_transcript TEXT,
           is_voice_created BOOLEAN DEFAULT FALSE,
           
-          CONSTRAINT valid_status CHECK (status IN ('To Do', 'In Progress', 'Done')),
-          CONSTRAINT valid_priority CHECK (priority IN ('Low', 'Medium', 'High', 'Critical'))
+          CONSTRAINT valid_status CHECK (status IN ('to do', 'in progress', 'done')),
+          CONSTRAINT valid_priority CHECK (priority IN ('low', 'medium', 'high', 'critical'))
         );
       `);
     },

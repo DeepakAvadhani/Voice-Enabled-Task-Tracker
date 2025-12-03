@@ -5,32 +5,32 @@ class NLPParser {
     const lowercaseText = text.toLowerCase();
     
     if (lowercaseText.match(/\b(critical|urgent|asap|immediately|emergency)\b/)) {
-      return 'Critical';
+      return 'critical';
     }
     
     if (lowercaseText.match(/\b(high priority|high|important)\b/)) {
-      return 'High';
+      return 'high';
     }
     
     if (lowercaseText.match(/\b(low priority|low|minor|whenever)\b/)) {
-      return 'Low';
+      return 'low';
     }
     
-    return 'Medium';
+    return 'medium';
   }
 
   parseStatus(text) {
     const lowercaseText = text.toLowerCase();
     
     if (lowercaseText.match(/\b(in progress|working on|started|doing)\b/)) {
-      return 'In Progress';
+      return 'in progress';
     }
     
     if (lowercaseText.match(/\b(done|completed|finished)\b/)) {
-      return 'Done';
+      return 'done';
     }
     
-    return 'To Do';
+    return 'to do';
   }
 
   parseDueDate(text) {

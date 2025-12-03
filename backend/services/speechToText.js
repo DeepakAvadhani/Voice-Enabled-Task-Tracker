@@ -4,9 +4,9 @@ const fs = require("fs");
 
 const API_KEY = process.env.ASSEMBLY_API_KEY;
 const UPLOAD_URL =
-  ASSEMBLY_API_UPLOAD_URL || "https://api.assemblyai.com/v2/upload";
+   "https://api.assemblyai.com/v2/upload";
 const TRANSCRIPT_URL =
-  ASSEMBLY_API_TRANSCRIPT_URL || "https://api.assemblyai.com/v2/transcript";
+  "https://api.assemblyai.com/v2/transcript";
 
 module.exports = {
   async uploadAudioFile(audioPath) {
