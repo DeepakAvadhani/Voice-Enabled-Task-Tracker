@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const taskroutes = require("./routes/taskRoutes");
 const app = express();
-
+const port = process.env.PORT;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -14,6 +14,6 @@ app.get("/api/health", (req, res) => {
   res.status(200).send("Server is up and Running!");
 });
 
-app.listen(3000, () => {
+app.listen(port, () => {
   console.log("Server is running on port 3000");
 });
