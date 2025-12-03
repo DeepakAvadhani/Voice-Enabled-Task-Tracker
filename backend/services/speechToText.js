@@ -1,9 +1,8 @@
 const axios = require("axios");
 
-const API_KEY =
-  process.env.ASSEMBLYAI_API_KEY || "14695ef4e86d44aeb262b577aee2e798";
-const UPLOAD_URL = "https://api.assemblyai.com/v2/upload";
-const TRANSCRIPT_URL = "https://api.assemblyai.com/v2/transcript";
+const API_KEY = process.env.ASSEMBLY_API_KEY;
+const UPLOAD_URL = process.env.ASSEMBLY_API_UPLOAD_URL;
+const TRANSCRIPT_URL = process.env.ASSEMBLY_API_TRANSCRIPT_URL;
 
 module.exports = {
   async uploadAudioBuffer(audioBuffer) {
