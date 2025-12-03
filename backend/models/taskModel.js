@@ -27,7 +27,13 @@ const taskModel = {
     return result.rows[0];
   },
 
-  async findAll(filters = {}) {
+  async findAll(sortBy = 'created_at', order = 'DESC', filters = {}) {
+    const validSortFields = ['created_at', 'due_date', 'priority', 'status', 'title'];
+    const validOrders = ['ASC', 'DESC'];
+    
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
+    const sortOrder = validOrders.includes(order.toUpperCase()) ? order.toUpperCase() : 'DESC';
+
     let query = "SELECT * FROM tasks WHERE 1=1";
     const values = [];
     let paramCount = 1;
@@ -50,7 +56,7 @@ const taskModel = {
       paramCount++;
     }
 
-    query += " ORDER BY created_at DESC";
+    query += ` ORDER BY ${sortField} ${sortOrder}`;
 
     const result = await pool.query(query, values);
     return result.rows;
@@ -92,7 +98,7 @@ const taskModel = {
     values.push(id);
     const query = `
       UPDATE tasks 
-      SET ${fields.join(", ")}
+      SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP
       WHERE id = $${paramCount}
       RETURNING *
     `;
@@ -113,6 +119,43 @@ const taskModel = {
     return { message: "All tasks deleted" };
   },
 
+  async search(searchTerm) {
+    const query = `
+      SELECT * FROM tasks
+      WHERE title ILIKE $1 OR description ILIKE $1
+      ORDER BY created_at DESC
+    `;
+    const result = await pool.query(query, [`%${searchTerm}%`]);
+    return result.rows;
+  },
+
+  async filterByStatus(status) {
+    const query = `
+      SELECT * FROM tasks
+      WHERE status = $1
+      ORDER BY 
+        CASE priority
+          WHEN 'Critical' THEN 1
+          WHEN 'High' THEN 2
+          WHEN 'Medium' THEN 3
+          WHEN 'Low' THEN 4
+        END,
+        due_date ASC NULLS LAST
+    `;
+    const result = await pool.query(query, [status]);
+    return result.rows;
+  },
+
+  async filterByPriority(priority) {
+    const query = `
+      SELECT * FROM tasks
+      WHERE priority = $1
+      ORDER BY due_date ASC NULLS LAST, created_at DESC
+    `;
+    const result = await pool.query(query, [priority]);
+    return result.rows;
+  },
+
   async countByStatus() {
     const query = `
       SELECT status, COUNT(*) as count 
@@ -127,11 +170,11 @@ const taskModel = {
     const query = `
       SELECT * FROM tasks 
       WHERE due_date IS NOT NULL 
-      AND due_date BETWEEN CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP + INTERVAL '${days} days'
+      AND due_date BETWEEN CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP + ($1 || ' days')::INTERVAL
       AND status != 'Done'
       ORDER BY due_date ASC
     `;
-    const result = await pool.query(query);
+    const result = await pool.query(query, [days]);
     return result.rows;
   },
 

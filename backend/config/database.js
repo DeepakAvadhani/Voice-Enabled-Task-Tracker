@@ -19,6 +19,7 @@ pool
   })
   .catch((e) => {
     console.error("Database connection error: ", e);
+    process.exit(1);
   });
 
 const query = (text, params) => pool.query(text, params); //
