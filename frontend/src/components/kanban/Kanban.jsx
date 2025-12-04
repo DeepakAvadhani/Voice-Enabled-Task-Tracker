@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { FiPlus, FiTrash } from "react-icons/fi";
+import { FiPlus, FiTrash, FiMic } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
+import VoiceRecordModal from "../voicerecord/VoiceRecordModal";
 import "./kanban.css";
 
 export const CustomKanban = () => {
@@ -14,39 +15,63 @@ export const CustomKanban = () => {
 
 const Board = () => {
   const [cards, setCards] = useState(DEFAULT_CARDS);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+
+  const handleTaskCreated = () => {
+    setShowVoiceModal(false);
+  };
 
   return (
-    <div className="board">
-      <Column
-        title="Backlog"
-        column="backlog"
-        headingColor="backlog"
-        cards={cards}
-        setCards={setCards}
-      />
-      <Column
-        title="To Do"
-        column="todo"
-        headingColor="todo"
-        cards={cards}
-        setCards={setCards}
-      />
-      <Column
-        title="In Progress"
-        column="inprogress"
-        headingColor="inprogress"
-        cards={cards}
-        setCards={setCards}
-      />
-      <Column
-        title="Completed"
-        column="completed"
-        headingColor="completed"
-        cards={cards}
-        setCards={setCards}
-      />
-      <BurnBarrel setCards={setCards} />
-    </div>
+    <>
+      <div className="board-header">
+        <button 
+          className="voice-create-button"
+          onClick={() => setShowVoiceModal(true)}
+        >
+          <FiMic />
+          <span>Create with Voice</span>
+        </button>
+      </div>
+
+      <div className="board">
+        <Column
+          title="Backlog"
+          column="backlog"
+          headingColor="backlog"
+          cards={cards}
+          setCards={setCards}
+        />
+        <Column
+          title="To Do"
+          column="todo"
+          headingColor="todo"
+          cards={cards}
+          setCards={setCards}
+        />
+        <Column
+          title="In Progress"
+          column="inprogress"
+          headingColor="inprogress"
+          cards={cards}
+          setCards={setCards}
+        />
+        <Column
+          title="Completed"
+          column="completed"
+          headingColor="completed"
+          cards={cards}
+          setCards={setCards}
+        />
+        <BurnBarrel setCards={setCards} />
+      </div>
+
+      {showVoiceModal && (
+        <VoiceRecordModal 
+          onClose={() => setShowVoiceModal(false)}
+          onTaskCreated={handleTaskCreated}
+        />
+      )}
+    </>
   );
 };
 
