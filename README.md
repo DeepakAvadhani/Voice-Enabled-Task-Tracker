@@ -414,9 +414,8 @@ Content-Type: multipart/form-data
 ### What AI Helped With
 
 **1. Initial Setup (25%)**
-- Generated Express server boilerplate
-- Created database schema with indexes
-- Set up environment configuration files
+- Used as brain storming tool for finding transcriptor for voice to word conversion.
+- Used for debugging while writing code for NLPParser service.
 
 **2. Documentation**
 - Structured API endpoint documentation
@@ -424,27 +423,16 @@ Content-Type: multipart/form-data
 - Generated example requests/responses
 
 **3. Debugging Support**
-- Identified SQL injection vulnerability in date query
-- Diagnosed state management issues in React
 - Fixed object-to-string conversion in transcription ID
 
 ### Key Learnings
 
 **What Worked Well:**
-- Quick boilerplate generation for CRUD operations
-- Database schema design suggestions
 - Comprehensive documentation templates
 
-**What Required Oversight:**
-- AI suggested localStorage for audio (modified to in-memory buffers)
-- Had to add extensive error handling manually
-- Validated security considerations (SQL injection, CORS)
-
 **Development Approach:**
-- Used AI for initial code structure
 - Manually refined business logic and error handling
 - Iteratively improved based on testing
-- AI accelerated development by ~30% overall
 
 ---
 
