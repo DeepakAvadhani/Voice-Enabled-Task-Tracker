@@ -21,6 +21,7 @@
 html, body, #root {
   height: 100%;
   width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -61,6 +62,18 @@ button:hover {
   border-color: #646cff;
 }
 
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.5em;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 2em;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -72,78 +85,4 @@ button:hover {
   button {
     background-color: #f9f9f9;
   }
-}
-
-.background-rays {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.custom-rays {
-  width: 100%;
-  height: 100%;
-  mix-blend-mode: screen;
-  opacity: 0.75;
-}
-
-.hero-container {
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-
-.hero-card {
-  backdrop-filter: blur(25px) saturate(180%);
-  background: rgba(0, 20, 20, 0.45);
-  border: 1px solid rgba(0, 255, 255, 0.25);
-  border-radius: 20px;
-  padding: 50px 60px;
-  text-align: center;
-  box-shadow: 0 0 35px rgba(0, 255, 255, 0.25);
-  animation: fadeIn 1s ease forwards;
-}
-
-.hero-title {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  text-shadow: 0 0 20px #00ffffaa;
-}
-
-.hero-subtitle {
-  font-size: 1.2rem;
-  font-weight: 300;
-  margin-bottom: 35px;
-  opacity: 0.85;
-}
-
-.get-started-btn {
-  padding: 14px 32px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, #00eaff, #00ffd5);
-  color: #001212;
-  box-shadow: 0 0 18px #00ffffaa;
-  transition: 0.25s ease;
-}
-
-.get-started-btn:hover {
-  transform: scale(1.07);
-  box-shadow: 0 0 30px #00ffffee;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
 }

@@ -1,30 +1,170 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiPlus, FiTrash, FiMic } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { FaFire } from "react-icons/fa";
 import VoiceRecordModal from "../voicerecord/VoiceRecordModal";
+import TaskForm from "../../components/taskFom/taskForm";
+import { taskAPI } from "../../api/api";
 import "./kanban.css";
 
-export const CustomKanban = () => {
+export const CustomKanban = ({ refreshTrigger }) => {
   return (
     <div className="kanban-container">
-      <Board />
+      <Board refreshTrigger={refreshTrigger} />
     </div>
   );
 };
 
-const Board = () => {
-  const [cards, setCards] = useState(DEFAULT_CARDS);
+const Board = ({ refreshTrigger }) => {
+  const [cards, setCards] = useState([]);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [refreshTrigger]);
+
+  const isTaskOverdue = (dueDate) => {
+    if (!dueDate) return false;
+    const now = new Date();
+    const due = new Date(dueDate);
+    return due < now;
+  };
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const result = await taskAPI.getAllTasks();
+      const formattedCards = result.data.map((task) => {
+        let column = mapStatusToColumn(task.status);
+
+        if (task.status !== "Done" && isTaskOverdue(task.due_date)) {
+          column = "backlog";
+        }
+
+        return {
+          id: task.id.toString(),
+          title: task.title,
+          column: column,
+          priority: task.priority,
+          dueDate: task.due_date,
+          status: task.status,
+          description: task.description,
+          isOverdue: isTaskOverdue(task.due_date) && task.status !== "Done",
+        };
+      });
+      setCards(formattedCards);
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mapStatusToColumn = (status) => {
+    const statusMap = {
+      "To Do": "todo",
+      "In Progress": "inprogress",
+      Done: "completed",
+    };
+    return statusMap[status] || "todo";
+  };
+
+  const mapColumnToStatus = (column) => {
+    const columnMap = {
+      backlog: "To Do",
+      todo: "To Do",
+      inprogress: "In Progress",
+      completed: "Done",
+    };
+    return columnMap[column] || "To Do";
+  };
 
   const handleTaskCreated = () => {
     setShowVoiceModal(false);
+    setShowTaskModal(false);
+    fetchTasks();
   };
+
+  const handleCardMove = async (cardId, newColumn) => {
+    const previousCards = [...cards];
+
+    setCards((prevCards) =>
+      prevCards.map((card) =>
+        card.id === cardId
+          ? { ...card, column: newColumn, status: mapColumnToStatus(newColumn) }
+          : card
+      )
+    );
+
+    try {
+      const newStatus = mapColumnToStatus(newColumn);
+      await taskAPI.updateTask(cardId, { status: newStatus });
+    } catch (error) {
+      console.error("Failed to update task:", error);
+      setCards(previousCards);
+    }
+  };
+
+  const handleCardDelete = async (cardId) => {
+    try {
+      await taskAPI.deleteTask(cardId);
+      setCards((prev) => prev.filter((c) => c.id !== cardId));
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+    }
+  };
+
+  const handleCardAdd = async (column, title) => {
+    try {
+      const status = mapColumnToStatus(column);
+      const result = await taskAPI.createTask({
+        title,
+        description: "",
+        status,
+        priority: "Medium",
+        dueDate: null,
+        isVoiceCreated: false,
+      });
+
+      const newCard = {
+        id: result.data.id.toString(),
+        title: result.data.title,
+        column,
+        priority: result.data.priority,
+        status: result.data.status,
+        isOverdue: false,
+      };
+
+      setCards((prev) => [...prev, newCard]);
+    } catch (error) {
+      console.error("Failed to create task:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="kanban-container">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="board-header">
-        <button 
+        <button
+          className="manual-create-button"
+          onClick={() => setShowTaskModal(true)}
+        >
+          <FiPlus />
+          <span>New Task</span>
+        </button>
+        <button
           className="voice-create-button"
           onClick={() => setShowVoiceModal(true)}
         >
@@ -40,6 +180,8 @@ const Board = () => {
           headingColor="backlog"
           cards={cards}
           setCards={setCards}
+          onCardMove={handleCardMove}
+          onCardAdd={handleCardAdd}
         />
         <Column
           title="To Do"
@@ -47,6 +189,8 @@ const Board = () => {
           headingColor="todo"
           cards={cards}
           setCards={setCards}
+          onCardMove={handleCardMove}
+          onCardAdd={handleCardAdd}
         />
         <Column
           title="In Progress"
@@ -54,6 +198,8 @@ const Board = () => {
           headingColor="inprogress"
           cards={cards}
           setCards={setCards}
+          onCardMove={handleCardMove}
+          onCardAdd={handleCardAdd}
         />
         <Column
           title="Completed"
@@ -61,13 +207,22 @@ const Board = () => {
           headingColor="completed"
           cards={cards}
           setCards={setCards}
+          onCardMove={handleCardMove}
+          onCardAdd={handleCardAdd}
         />
-        <BurnBarrel setCards={setCards} />
+        <BurnBarrel setCards={setCards} onCardDelete={handleCardDelete} />
       </div>
 
       {showVoiceModal && (
-        <VoiceRecordModal 
+        <VoiceRecordModal
           onClose={() => setShowVoiceModal(false)}
+          onTaskCreated={handleTaskCreated}
+        />
+      )}
+
+      {showTaskModal && (
+        <TaskForm
+          onClose={() => setShowTaskModal(false)}
           onTaskCreated={handleTaskCreated}
         />
       )}
@@ -75,7 +230,15 @@ const Board = () => {
   );
 };
 
-const Column = ({ title, headingColor, cards, column, setCards }) => {
+const Column = ({
+  title,
+  headingColor,
+  cards,
+  column,
+  setCards,
+  onCardMove,
+  onCardAdd,
+}) => {
   const [active, setActive] = useState(false);
 
   const handleDragStart = (e, card) => {
@@ -98,6 +261,8 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
 
       let cardToTransfer = copy.find((c) => c.id === cardId);
       if (!cardToTransfer) return;
+
+      const oldColumn = cardToTransfer.column;
       cardToTransfer = { ...cardToTransfer, column };
 
       copy = copy.filter((c) => c.id !== cardId);
@@ -114,19 +279,21 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
       }
 
       setCards(copy);
+
+      if (oldColumn !== column) {
+        onCardMove(cardId, column);
+      }
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
     highlightIndicator(e);
-
     setActive(true);
   };
 
   const clearHighlights = (els) => {
     const indicators = els || getIndicators();
-
     indicators.forEach((i) => {
       i.style.opacity = "0";
     });
@@ -134,11 +301,8 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
 
   const highlightIndicator = (e) => {
     const indicators = getIndicators();
-
     clearHighlights(indicators);
-
     const el = getNearestIndicator(e, indicators);
-
     el.element.style.opacity = "1";
   };
 
@@ -148,7 +312,6 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
     const el = indicators.reduce(
       (closest, child) => {
         const box = child.getBoundingClientRect();
-
         const offset = e.clientY - (box.top + DISTANCE_OFFSET);
 
         if (offset < 0 && offset > closest.offset) {
@@ -181,9 +344,7 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
     <div className="column">
       <div className="column-header">
         <h3 className={`column-title ${headingColor}`}>{title}</h3>
-        <span className="column-count">
-          {filteredCards.length}
-        </span>
+        <span className="column-count">{filteredCards.length}</span>
       </div>
       <div
         onDrop={handleDragEnd}
@@ -195,13 +356,64 @@ const Column = ({ title, headingColor, cards, column, setCards }) => {
           return <Card key={c.id} {...c} handleDragStart={handleDragStart} />;
         })}
         <DropIndicator beforeId={null} column={column} />
-        <AddCard column={column} setCards={setCards} />
+        <AddCard column={column} onCardAdd={onCardAdd} />
       </div>
     </div>
   );
 };
 
-const Card = ({ title, id, column, handleDragStart }) => {
+const Card = ({
+  title,
+  id,
+  column,
+  priority,
+  isOverdue,
+  dueDate,
+  handleDragStart,
+}) => {
+  const getDueDateInfo = (date) => {
+    if (!date) return null;
+    const dueDate = new Date(date);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    today.setHours(0, 0, 0, 0);
+    tomorrow.setHours(0, 0, 0, 0);
+    const dueDateOnly = new Date(dueDate);
+    dueDateOnly.setHours(0, 0, 0, 0);
+
+    const diffTime = dueDateOnly.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { text: "Overdue", urgency: "overdue" };
+    } else if (diffDays === 0) {
+      return { text: "Due today", urgency: "today" };
+    } else if (diffDays === 1) {
+      return { text: "Due tomorrow", urgency: "tomorrow" };
+    } else if (diffDays <= 3) {
+      return {
+        text: dueDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        urgency: "soon",
+      };
+    } else {
+      return {
+        text: dueDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        urgency: "later",
+      };
+    }
+  };
+
+  const dueDateInfo = getDueDateInfo(dueDate);
+
   return (
     <>
       <DropIndicator beforeId={id} column={column} />
@@ -210,9 +422,21 @@ const Card = ({ title, id, column, handleDragStart }) => {
         layoutId={id}
         draggable="true"
         onDragStart={(e) => handleDragStart(e, { title, id, column })}
-        className="card"
+        className={`card ${isOverdue ? "overdue" : ""}`}
       >
         <p className="card-text">{title}</p>
+        <div className="card-footer">
+          {priority && (
+            <span className={`card-priority ${priority.toLowerCase()}`}>
+              {priority}
+            </span>
+          )}
+          {dueDateInfo && (
+            <span className={`card-due-date ${dueDateInfo.urgency}`}>
+              {dueDateInfo.text}
+            </span>
+          )}
+        </div>
       </motion.div>
     </>
   );
@@ -228,7 +452,7 @@ const DropIndicator = ({ beforeId, column }) => {
   );
 };
 
-const BurnBarrel = ({ setCards }) => {
+const BurnBarrel = ({ setCards, onCardDelete }) => {
   const [active, setActive] = useState(false);
 
   const handleDragOver = (e) => {
@@ -242,9 +466,8 @@ const BurnBarrel = ({ setCards }) => {
 
   const handleDragEnd = (e) => {
     const cardId = e.dataTransfer.getData("cardId");
-
     setCards((pv) => pv.filter((c) => c.id !== cardId));
-
+    onCardDelete(cardId);
     setActive(false);
   };
 
@@ -260,7 +483,7 @@ const BurnBarrel = ({ setCards }) => {
   );
 };
 
-const AddCard = ({ column, setCards }) => {
+const AddCard = ({ column, onCardAdd }) => {
   const [text, setText] = useState("");
   const [adding, setAdding] = useState(false);
 
@@ -269,14 +492,8 @@ const AddCard = ({ column, setCards }) => {
 
     if (!text.trim().length) return;
 
-    const newCard = {
-      column,
-      title: text.trim(),
-      id: Math.random().toString(),
-    };
-
-    setCards((pv) => [...pv, newCard]);
-
+    onCardAdd(column, text.trim());
+    setText("");
     setAdding(false);
   };
 
@@ -288,18 +505,17 @@ const AddCard = ({ column, setCards }) => {
             onChange={(e) => setText(e.target.value)}
             autoFocus
             placeholder="Add new task..."
+            value={text}
           />
           <div className="add-card-buttons">
             <button
               onClick={() => setAdding(false)}
               className="close-button"
+              type="button"
             >
               Close
             </button>
-            <button
-              type="submit"
-              className="add-button"
-            >
+            <button type="submit" className="add-button">
               <span>Add</span>
               <FiPlus />
             </button>
@@ -318,28 +534,3 @@ const AddCard = ({ column, setCards }) => {
     </>
   );
 };
-
-const DEFAULT_CARDS = [
-  { title: "Look into render bug in dashboard", id: "1", column: "backlog" },
-  { title: "SOX compliance checklist", id: "2", column: "backlog" },
-  { title: "[SPIKE] Migrate to Azure", id: "3", column: "backlog" },
-  { title: "Document Notifications service", id: "4", column: "backlog" },
-  {
-    title: "Research DB options for new microservice",
-    id: "5",
-    column: "todo",
-  },
-  { title: "Postmortem for outage", id: "6", column: "todo" },
-  { title: "Sync with product on Q3 roadmap", id: "7", column: "todo" },
-  {
-    title: "Refactor context providers to use Zustand",
-    id: "8",
-    column: "inprogress",
-  },
-  { title: "Add logging to daily CRON", id: "9", column: "inprogress" },
-  {
-    title: "Set up DD dashboards for Lambda listener",
-    id: "10",
-    column: "completed",
-  },
-];
